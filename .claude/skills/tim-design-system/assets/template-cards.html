@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图文卡片 - Esther不二</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700;900&family=Noto+Sans+SC:wght@400;500;700;900&family=Fraunces:ital,wght@1,400;1,700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="html2canvas.min.js" onerror="console.error('html2canvas failed to load')"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --yellow: #F4D758;
+  --yellow-soft: #FFF3CD;
+  --blue: #2B7FD8;
+  --blue-deep: #1E5BA8;
+  --red: #E84A5F;
+  --cream: #fefcf6;
+  --cream-dark: #faf6eb;
+  --ink: #1A1A2E;
+  --ink-light: #4A4A5A;
+  --ink-faint: #8A8A9A;
+}
+
+body {
+  background: #e8e4de;
+  font-family: 'Noto Sans SC', sans-serif;
+  color: var(--ink);
+  padding: 40px 20px;
+}
+
+/* ========== 导出栏 ========== */
+.export-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: var(--ink);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.export-bar button {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'Noto Sans SC', sans-serif;
+}
+
+.export-bar button:hover { background: #1a6abf; }
+
+.export-bar .hint {
+  color: #aaa;
+  font-size: 13px;
+}
+
+/* ========== 卡片容器 ========== */
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  margin-top: 80px;
+}
+
+.card {
+  width: 1080px;
+  height: 1440px;
+  position: relative;
+  overflow: hidden;
+  transform: scale(0.45);
+  transform-origin: top center;
+  margin-bottom: -792px;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+}
+
+/* ========== P1 封面 ========== */
+.p-cover {
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 90px;
+}
+
+.p-cover .deco-top {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 8px;
+  background: linear-gradient(90deg, var(--blue) 60%, var(--yellow) 80%, var(--red) 100%);
+}
+
+.p-cover .tag {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--blue);
+  display: inline-block;
+  padding: 8px 24px;
+  border-radius: 6px;
+  margin-bottom: 40px;
+  letter-spacing: 2px;
+}
+
+.p-cover h1 {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 900;
+  font-size: 88px;
+  line-height: 1.2;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+
+.p-cover h1 .highlight { color: var(--blue); }
+
+.p-cover .subtitle {
+  font-size: 42px;
+  color: var(--ink-light);
+  font-weight: 500;
+  line-height: 1.6;
+  margin-bottom: 80px;
+}
+
+.p-cover .author-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-top: auto;
+}
+
+.p-cover .avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--yellow);
+}
+
+.p-cover .author-name {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.p-cover .author-desc {
+  font-size: 24px;
+  color: var(--ink-light);
+  margin-top: 4px;
+}
+
+/* ========== 深色面板页 ========== */
+.p-dark {
+  background: var(--ink);
+  display: flex;
+  flex-direction: column;
+  padding: 80px 80px;
+}
+
+.p-dark .page-num {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 120px;
+  color: var(--yellow);
+  opacity: 0.15;
+  position: absolute;
+  top: 40px;
+  right: 80px;
+  font-weight: 700;
+}
+
+.p-dark h2 {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 900;
+  font-size: 52px;
+  color: var(--cream);
+  margin-bottom: 16px;
+}
+
+.p-dark .sub {
+  font-size: 32px;
+  color: var(--yellow);
+  margin-bottom: 60px;
+  font-weight: 500;
+}
+
+.p-dark .items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 36px;
+}
+
+.p-dark .item {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.p-dark .item .icon {
+  font-size: 40px;
+  flex-shrink: 0;
+  width: 56px;
+  text-align: center;
+}
+
+.p-dark .item .text {
+  font-size: 38px;
+  color: #e8e4de;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.p-dark .item .text strong {
+  color: #fff;
+  font-weight: 700;
+}
+
+.p-dark .deco-line {
+  position: absolute;
+  bottom: 80px;
+  left: 80px;
+  right: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--blue) 50%, var(--yellow) 75%, var(--red) 100%);
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+/* ========== 浅色列表页 ========== */
+.p-list {
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  padding: 72px 80px;
+}
+
+.p-list .page-num {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 120px;
+  color: var(--blue);
+  opacity: 0.12;
+  position: absolute;
+  top: 40px;
+  right: 80px;
+  font-weight: 700;
+}
+
+.p-list h2 {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 900;
+  font-size: 52px;
+  margin-bottom: 48px;
+  color: var(--ink);
+}
+
+.p-list h2::after {
+  content: '';
+  display: block;
+  width: 80px;
+  height: 6px;
+  background: var(--yellow);
+  margin-top: 16px;
+  border-radius: 3px;
+}
+
+.p-list .content-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+/* ========== 尾页 ========== */
+.p-end {
+  background: var(--cream);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 80px 90px;
+  text-align: center;
+}
+
+.p-end .deco-bottom {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 8px;
+  background: linear-gradient(90deg, var(--blue) 60%, var(--yellow) 80%, var(--red) 100%);
+}
+
+.p-end .quote-mark {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 200px;
+  color: var(--blue);
+  opacity: 0.15;
+  line-height: 0.6;
+  margin-bottom: -20px;
+}
+
+.p-end .quote {
+  font-family: 'Noto Serif SC', serif;
+  font-weight: 900;
+  font-size: 60px;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-bottom: 32px;
+  max-width: 900px;
+}
+
+.p-end .quote .highlight {
+  color: var(--blue);
+  text-decoration: underline;
+  text-decoration-color: var(--yellow);
+  text-underline-offset: 8px;
+  text-decoration-thickness: 4px;
+}
+
+.p-end .avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--yellow);
+  margin-bottom: 20px;
+}
+
+.p-end .author-name {
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+
+.p-end .cta {
+  font-size: 32px;
+  color: var(--blue);
+  font-weight: 600;
+  margin-bottom: 48px;
+}
+
+.p-end .tagline {
+  font-size: 26px;
+  color: var(--ink-light);
+  letter-spacing: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="export-bar">
+  <button onclick="exportAll()">📥 一键导出PNG</button>
+  <span class="hint">每张卡片导出为1080×1440 PNG</span>
+</div>
+
+<div class="cards-container">
+
+<!-- ===== P1 封面 ===== -->
+<!-- 大标题+副标题+头像+署名。内容少，字要大，留白多。 -->
+<div class="card p-cover" data-card="1">
+  <div class="deco-top"></div>
+  <span class="tag"><!-- 分类标签，如"AI教程"、"效率工具" --></span>
+  <h1><!-- 主标题，72-96px --><span class="highlight"><!-- 高亮关键词 --></span></h1>
+  <p class="subtitle"><!-- 副标题/一句话说明 --></p>
+  <div class="author-row">
+    <img class="avatar" src="avatar.jpg" alt="avatar">
+    <div>
+      <div class="author-name">Esther不二</div>
+      <div class="author-desc">AI时代的个人品牌实验</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== P2 深色面板页示例 ===== -->
+<!-- 适合代码、文件树、核心要点强调。深色底+亮色文字。 -->
+<div class="card p-dark" data-card="2">
+  <span class="page-num">02</span>
+  <h2><!-- 页面标题 --></h2>
+  <p class="sub"><!-- 副标题/小字说明 --></p>
+  <div class="items">
+    <!-- 每项：icon + 文字说明 -->
+    <div class="item">
+      <span class="icon"><!-- emoji --></span>
+      <span class="text"><strong><!-- 要点标题 --></strong><!-- 说明文字 --></span>
+    </div>
+    <!-- 重复3-6项 -->
+  </div>
+  <div class="deco-line"></div>
+</div>
+
+<!-- ===== P3 浅色列表页示例 ===== -->
+<!-- 适合步骤、列表、分点说明。浅色底+oversized编号装饰。 -->
+<div class="card p-list" data-card="3">
+  <span class="page-num">03</span>
+  <h2><!-- 页面标题 --></h2>
+  <div class="content-area">
+    <!-- 根据内容选择排版：
+         - 步骤流程：oversized编号 + 文字
+         - 对比列表：色块交替行
+         - 代码展示：深色代码面板
+         - 自由组合，避免与其他页重复 -->
+  </div>
+</div>
+
+<!-- ===== 最后一页 尾页 ===== -->
+<!-- 金句+头像+CTA。oversized引号装饰，居中大字。 -->
+<div class="card p-end" data-card="last">
+  <div class="deco-bottom"></div>
+  <div class="quote-mark">"</div>
+  <p class="quote"><!-- 金句/核心观点 --><span class="highlight"><!-- 高亮关键词 --></span></p>
+  <img class="avatar" src="avatar.jpg" alt="avatar">
+  <p class="author-name">Esther不二</p>
+  <p class="cta">关注 Esther不二</p>
+  <p class="tagline">AI时代的个人品牌实验 | 用AI让生活变好</p>
+</div>
+
+</div><!-- cards-container -->
+
+<script>
+async function exportAll() {
+  if (typeof html2canvas === 'undefined') {
+    alert('⏳ html2canvas 正在加载，请稍等几秒后重试。');
+    return;
+  }
+  if (typeof JSZip === 'undefined') {
+    alert('JSZip 加载失败，请刷新重试。');
+    return;
+  }
+  const cards = document.querySelectorAll('.card');
+  const btn = document.querySelector('.export-bar button');
+  btn.textContent = '⏳ 导出中... 0/' + cards.length;
+  btn.disabled = true;
+
+  const zip = new JSZip();
+  const folder = zip.folder('cards-export');
+
+  for (let i = 0; i < cards.length; i++) {
+    const card = cards[i];
+    card.style.transform = 'none';
+    card.style.marginBottom = '0';
+    card.style.borderRadius = '0';
+    card.style.boxShadow = 'none';
+
+    await new Promise(r => setTimeout(r, 150));
+
+    try {
+      const canvas = await html2canvas(card, {
+        width: 1080,
+        height: 1440,
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        logging: false
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const base64 = dataUrl.split(',')[1];
+      folder.file(`card-${String(i + 1).padStart(2, '0')}.png`, base64, {base64: true});
+
+      btn.textContent = `⏳ 导出中... ${i + 1}/${cards.length}`;
+    } catch(e) {
+      console.error('Export error on card ' + (i+1), e);
+    } finally {
+      card.style.transform = 'scale(0.45)';
+      card.style.marginBottom = '-792px';
+      card.style.borderRadius = '4px';
+      card.style.boxShadow = '0 8px 40px rgba(0,0,0,0.12)';
+    }
+  }
+
+  btn.textContent = '⏳ 打包中...';
+  const blob = await zip.generateAsync({type: 'blob'});
+  const link = document.createElement('a');
+  link.download = 'cards-export.zip';
+  link.href = URL.createObjectURL(blob);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
+
+  btn.textContent = '✅ 导出完成';
+  setTimeout(() => { btn.textContent = '📥 一键导出PNG'; btn.disabled = false; }, 2000);
+}
+</script>
+
+</body>
+</html>
